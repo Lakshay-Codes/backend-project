@@ -3,7 +3,7 @@
 //so make a wrapper function's function to pass a function
 //to get premade async await try catch
 const asyncHandler = (resquestHandler) => {
-    (req,res,next) => {
+    return (req,res,next) => {
         //same as async 
         //same as try
         //same as catch
