@@ -1,7 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
 import {User} from "../models/user.model.js"
-import {uploadOnCloundinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import {ApiResponse} from '../utils/ApiResponse.js'
 
 const registerUser = asyncHandler(async(req,res) => {
@@ -14,7 +14,7 @@ const registerUser = asyncHandler(async(req,res) => {
     const {fullName, email, username, password} = req.body;
 
     //testing
-    console.log("email: ",email);    
+    // console.log("email: ",email);    
 
     //2) Validation - Not Empty
 
@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async(req,res) => {
     //3) Check if user already exists ---> Check from username & email
     //whenever you want to check if user already exists
     //then go to the model of the user and then
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{username},{email}]
     })
 
@@ -46,17 +46,28 @@ const registerUser = asyncHandler(async(req,res) => {
     //this gives us path of the saved file using multer
     //? means there is a possiblity of unavailablity of paths
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    
+    //since coverImage array this way cant be ensured we need to do
+    //some other thing -> here optional chaining gave issues
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    //use let to handle scope issue
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
+        coverImageLocalPath= req.files.coverImage[0].path;
+    }
+
 
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is required");
     }
 
+    // console.log(req.files);
 
     //5) Upload them to cloudinary, avatar
     
-    const avatar = await uploadOnCloundinary(avatarLocalPath);
-    const coverImage = await uploadOnCloundinary(coverImageLocalPath);
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     if(!avatar){
         throw new ApiError(400,"Avatar file is required");
