@@ -7,10 +7,10 @@ import {ApiResponse} from '../utils/ApiResponse.js'
 const generateAccessAndRefreshTokens = async(userId) => {
     try{    
         const user = await User.findById(userId);
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generteRefreshToken()
-        user.refreshToken = refreshToken
-        await user.save({validateBeforeSave : false})
+        const accessToken = await user.generateAccessToken();
+        const refreshToken = await user.generateRefreshToken();
+        user.refreshToken = refreshToken;
+        await user.save({validateBeforeSave : false});
         return {accessToken,refreshToken}
     }catch(error){
         throw new ApiError(500,"Something went wrong while generating refresh and access token")
@@ -117,7 +117,7 @@ const loginUser = asyncHandler(async(req,res) => {
     //req body -> data
     const {email,username,password} = req.body;
     //username or email
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400,"username or email is required");
     }
     //find the user 
@@ -138,7 +138,7 @@ const loginUser = asyncHandler(async(req,res) => {
     }
 
     //access and refresh token
-    await generateAccessAndRefreshTokens(user._id);
+    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id);
     
     //send cookie
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")

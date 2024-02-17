@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {registerUser,loginUser} from '../controllers/user.controller.js'
+import {registerUser,loginUser,logoutUser} from '../controllers/user.controller.js'
 //use multer to store images locally it is a middleware
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
